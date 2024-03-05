@@ -1,5 +1,7 @@
 # Probabilistic-Hadamard-U-Net
 
+![model](https://github.com/Holmes696/Probabilistic-Hadamard-U-Net/assets/162382272/dfa8ddec-292f-40c3-88d0-5ce37b6f9693)
+
 Objective: Probabilistic-Hadamard-U-Net is an end-to-end supervised learning approach for prostate MRI bias field correction.
 
 Methods: At the start, a novel Hadamard U-Net (HU-Net) is introduced to extract the low-frequency scalar field, multiplied by the original input to obtain the prototypical corrected images. Specifically, HU-Net converts the input images from the time domain into the frequency domain via Hadamard transform. In the frequency domain, high-frequency components are eliminated using the trainable filter (scaling layer), hard-thresholding layer, and sparsity penalty. After that, a conditional variational autoencoder encodes possible bias field-corrected variants into a low-dimensional latent space. Random samples drawn from latent space are incorporated with a prototypical corrected image to generate multiple plausible images.
