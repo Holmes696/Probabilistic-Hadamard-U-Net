@@ -1,10 +1,7 @@
 # Probabilistic-Hadamard-U-Net
 
-![model](https://github.com/Holmes696/Probabilistic-Hadamard-U-Net/assets/162382272/6054792d-47ab-42a1-b5d6-94164125c76f)
+Objective: Probabilistic-Hadamard-U-Net is an end-to-end supervised learning approach for prostate MRI bias field correction.
 
+Methods: At the start, a novel Hadamard U-Net (HU-Net) is introduced to extract the low-frequency scalar field, multiplied by the original input to obtain the prototypical corrected images. Specifically, HU-Net converts the input images from the time domain into the frequency domain via Hadamard transform. In the frequency domain, high-frequency components are eliminated using the trainable filter (scaling layer), hard-thresholding layer, and sparsity penalty. After that, a conditional variational autoencoder encodes possible bias field-corrected variants into a low-dimensional latent space. Random samples drawn from latent space are incorporated with a prototypical corrected image to generate multiple plausible images.
 
-Objective: NPPY is an end-to-end weakly supervised learning approach for converting raw head MRI images to intensity-normalized, skull-stripped brain in a standard coordinate space.
-
-Methods: NPPY solves three sub-tasks simultaneously through a neural network, without individual sub-task supervision. The sub-tasks include geometric-preserving intensity mapping, spatial transformation, and skull stripping. The model disentangles intensity mapping and spatial normalization to solve the under-constrained objective.
-
-Results: NPPY outperforms the state-of-the-art methods, which tackle only a single sub-task, according to quantitative results. The importance of NPP's architecture design is demonstrated through ablation experiments. Additionally, NPP provides users with the flexibility to control each task during inference time.
+Results: Experimental results demonstrate the effectiveness of PHU-Net in correcting inhomogeneities with a fast inference speed. With the high quality corrected images from PHU-Net, the prostate MRI segmentation accuracy improves.
