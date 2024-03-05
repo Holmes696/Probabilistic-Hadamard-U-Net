@@ -7,4 +7,15 @@ Methods: At the start, a novel Hadamard U-Net (HU-Net) is introduced to extract 
 Results: Experimental results demonstrate the effectiveness of PHU-Net in correcting inhomogeneities with a fast inference speed. With the high quality corrected images from PHU-Net, the prostate MRI segmentation accuracy improves.
 
 # Usage
-Run the train.py to train the model and test
+
+python train_model.py
+
+python test.py
+
+Run the train_model.py to train the model and test.py to test the model.
+
+# Dataset
+
+We use 4 T2-weighted prostate MRI datasets in the experiment: 
+HK dataset, UCL dataset, HCRUDB dataset  https://liuquande.github.io/SAML/
+AWS dataset  http://medicaldecathlon.com/ .
