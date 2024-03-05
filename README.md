@@ -8,6 +8,8 @@ Methods: At the start, a novel Hadamard U-Net (HU-Net) is introduced to extract 
 
 Results: Experimental results demonstrate the effectiveness of PHU-Net in correcting inhomogeneities with a fast inference speed. With the high quality corrected images from PHU-Net, the prostate MRI segmentation accuracy improves.
 
+![visual3](https://github.com/Holmes696/Probabilistic-Hadamard-U-Net/assets/162382272/4850b5c4-ce39-4195-99d2-4255dc940c3c)
+
 # Usage
 
 python train_model.py
