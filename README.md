@@ -17,5 +17,6 @@ Run the train_model.py to train the model and test.py to test the model.
 # Dataset
 
 We use 4 T2-weighted prostate MRI datasets in the experiment: 
+
 HK dataset, UCL dataset, HCRUDB dataset  https://liuquande.github.io/SAML/
 AWS dataset  http://medicaldecathlon.com/ .
