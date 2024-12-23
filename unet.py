@@ -204,7 +204,7 @@ class Unet(nn.Module):
 
         x=x28*x
     
-        loss_TV=TVLoss(x,np.random.uniform(0,0.1))
+        loss_TV=TVLoss(x28,np.random.uniform(0,0.1))
         loss_KL=KL_divergence(x6)+KL_divergence(x15)+KL_divergence(x24)
         loss = 1*loss_TV+0.1*loss_KL
         
