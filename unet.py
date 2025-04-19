@@ -100,28 +100,6 @@ def TVLoss(x,weight):
     tv_w = torch.abs(x[:,:,:,1:] - x[:,:,:,:-1]).sum()
     return weight * (tv_h + tv_w) / (batch_size * c * h * w)
 
-def KL_divergence(q):
-    """
-    Calculate the KL-divergence of (p,q)
-    :param p:
-    :param q:
-    :return:
-    """
-    a=q.shape[0]
-    b=q.shape[1]
-    c=q.shape[2]
-    d=q.shape[3]
-    e=int(a*b*c*d/64)
-    q=q.reshape(e,64)#/torch.max(abs(q))
-    RHO = 0.001
-    p = torch.FloatTensor([RHO for _ in range(64)]).to(device)
-    p = torch.nn.functional.sigmoid(abs(p))  
-    q = torch.nn.functional.sigmoid(abs(q)) 
-    q = torch.sum(q, dim=0)/e  # dim:缩减的维度,q的第一维是batch维,即大小为batch_size大小,此处是将第j个神经元在batch_size个输入下所有的输出取平均
-    s1 = torch.sum(p*torch.log(p/q))#计算第一部分
-    s2 = torch.sum((1-p)*torch.log((1-p)/(1-q)))#计算第二部分
-
-    return (s1+s2)
 
 class Unet(nn.Module):
     """
@@ -204,9 +182,7 @@ class Unet(nn.Module):
 
         x=x28*x
     
-        loss_TV=TVLoss(x28,np.random.uniform(0,0.1))
-        loss_KL=KL_divergence(x6)+KL_divergence(x15)+KL_divergence(x24)
-        loss = 1*loss_TV+0.1*loss_KL
+        loss=TVLoss(x28,np.random.uniform(0,0.1))
         
         return x,loss
 
