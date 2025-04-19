@@ -22,38 +22,6 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def Index_SNR(img):
-    a=img.shape[0]#first dimension
-    interval=50#interval
-    list_index=[]#set of index
-    for i in range(a):#repeat
-        if np.mean(img[i,0:interval,0:interval])>0.2:#mean value>0.2
-            continue#jump out
-        list_index.append(i)#otherwise add index
-    return list_index#return all index
-
-def SNR(img,list_index):
-    SNR_sum=0#init
-    count=0#init
-    for i in (list_index):#repeat
-        SI=np.mean(img[i,100:125,100:125])#meanvalue
-        SD=np.std(img[i,0:25,0:25])#std of background
-        SNR=SI/SD#SNR
-        count=count+1#count
-        SNR_sum=SNR_sum+SNR#sum
-    SNR_ave=SNR_sum/count#average
-    return SNR_ave
-
-def CV(img):
-    cv=0
-    for i in range(img.shape[0]):
-        sli=img[i]
-        mean=np.mean(sli[100:200,100:200])
-        std=np.std(sli[100:200,100:200])
-        cv=cv+std/mean
-    return 100*cv/img.shape[0]
-
-
 #Process segmenatation labels
 x = []
 y = []
@@ -115,17 +83,6 @@ for step,(patch,mask) in enumerate(test_loader):
         test_p.append(test_o_np[i])
 test_p=np.array(test_p)
 
-
-#Metrics
-print(CV(test_f_np))
-print(CV(test_g_np))
-print(CV(test_p))
-
-list_index=Index_SNR(test_g_np)
-
-print(SNR(test_f_np,list_index))
-print(SNR(test_g_np,list_index))
-print(SNR(test_p,list_index))
 
 
 
