@@ -24,13 +24,22 @@ Our approach integrates a Hadamard transform layer into the U-Net architecture t
 
 The folder "Hadamard layer" contains the implementation of 2D Hadamard Transform Layer. You need to import the function "WHTConv2D":
 
+```python
 from layers.WHT import WHTConv2D
+```
+
 For example, if the input tensor is 3x16x32x32 and the output is 3x16x32x32, single-path HT layer:
 
+```python
 WHTConv2D(32, 32, 16, 16, 1, residual=True)
+```
+
 3-path HT-perceptron layer:
 
+```python
 WHTConv2D(32, 32, 16, 16, 3, residual=False)
+```
+
 The parameter "pod" in the function "WHTConv2D" stands for the number of paths.
 
 # Dataset
