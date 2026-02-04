@@ -34,7 +34,7 @@ For example, if the input tensor is 3x16x32x32 and the output is 3x16x32x32, sin
 WHTConv2D(32, 32, 16, 16, 1, residual=True)
 ```
 
-3-path HT-perceptron layer:
+3-path HT layer:
 
 ```python
 WHTConv2D(32, 32, 16, 16, 3, residual=False)
