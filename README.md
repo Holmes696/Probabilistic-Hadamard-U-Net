@@ -18,6 +18,20 @@ Methods: The encoder comprises multiple convolutional Hadamard transform blocks 
 
 Results: Comprehensive experiments on body MRI datasets demonstrate the superiority of VHU-Net over existing state-of-the-art methods in terms of intensity uniformity, signal fidelity, and tissue contrast. Moreover, the corrected images yield substantial downstream improvements in segmentation accuracy. Our framework offers computational efficiency, interpretability, and robust performance across multi-center datasets, making it suitable for clinical deployment.
 
+# Usage
+
+Our approach integrates a Hadamard transform layer into the U-Net architecture to enhance bias field correction performance. 
+
+The folder "Hadamard layer" contains the implementation of 2D Hadamard Transform Layer. You need to import the function "WHTConv2D":
+
+from layers.WHT import WHTConv2D
+For example, if the input tensor is 3x16x32x32 and the output is 3x16x32x32, single-path HT layer:
+
+WHTConv2D(32, 32, 16, 16, 1, residual=True)
+3-path HT-perceptron layer:
+
+WHTConv2D(32, 32, 16, 16, 3, residual=False)
+The parameter "pod" in the function "WHTConv2D" stands for the number of paths.
 
 # Dataset
 
