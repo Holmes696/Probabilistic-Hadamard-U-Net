@@ -1,105 +1,5 @@
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov  9 22:00:10 2023
-
-@author: 28225
-"""
-import torch
-import torch.nn as nn
-#from unet_blocks import *
+from unet_blocks import *
 import torch.nn.functional as F
-#from scipy.fft import dct, idct
-import numpy as np
-import pdb
-from scipy.linalg import hadamard
-import matplotlib.pyplot as plt
-import os
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
-
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-#Hadamard transform
-def fwht(u, axis=-1, fast=False):
-    """Multiply H_n @ u where H_n is the Hadamard matrix of dimension n x n.
-    n must be a power of 2.
-    Parameters:
-        u: Tensor of shape (..., n)
-        normalize: if True, divide the result by 2^{m/2} where m = log_2(n).
-    Returns:
-        product: Tensor of shape (..., n)
-    """  
-    if axis != -1:
-        u = torch.transpose(u, -1, axis)
-    
-    n = u.shape[-1]
-    m = int(np.log2(n))
-    assert n == 1 << m, 'n must be a power of 2'
-    if fast:
-        x = u[..., np.newaxis]
-        for d in range(m)[::-1]:
-            x = torch.cat((x[..., ::2, :] + x[..., 1::2, :], x[..., ::2, :] - x[..., 1::2, :]), dim=-1)
-    else:
-        H = torch.tensor(hadamard(n), dtype=torch.float, device=u.device)
-        y = u @ H
-    if axis != -1:
-        y = torch.transpose(y, -1, axis)
-    return y
-
-#Inverse Hadamard transform
-def ifwht(u, axis=-1, fast=False):
-    """Multiply H_n @ u where H_n is the Hadamard matrix of dimension n x n.
-    n must be a power of 2.
-    Parameters:
-        u: Tensor of shape (..., n)
-        normalize: if True, divide the result by 2^{m/2} where m = log_2(n).
-    Returns:
-        product: Tensor of shape (..., n)
-    """  
-    if axis != -1:
-        u = torch.transpose(u, -1, axis)
-    
-    n = u.shape[-1]
-    m = int(np.log2(n))
-    assert n == 1 << m, 'n must be a power of 2'
-    if fast:
-        x = u[..., np.newaxis]
-        for d in range(m)[::-1]:
-            x = torch.cat((x[..., ::2, :] + x[..., 1::2, :], x[..., ::2, :] - x[..., 1::2, :]), dim=-1)
-        y = x.squeeze(-2) / n
-    else:
-        H = torch.tensor(hadamard(n), dtype=torch.float, device=u.device)
-        y = u @ H /n
-    if axis != -1:
-        y = torch.transpose(y, -1, axis)
-        
-    return y
-
-#Hard thresholding layer
-class Thresholding(torch.nn.Module):
-    def __init__(self, num_features):
-        super().__init__()
-        self.num_features = num_features
-        self.T = torch.nn.Parameter(torch.rand(self.num_features)/10)
-              
-    def forward(self, x):
-        x= torch.copysign(torch.nn.functional.relu(torch.abs(x)-torch.abs(self.T)), x)
-        y= x+torch.sign(x)*torch.abs(self.T)
-        return y
-
-def find_min_power(x, p=2):
-    y = 1
-    while y<x:
-        y *= p
-    return y
-
-def TVLoss(x,weight):
-    batch_size, c, h, w = x.size()
-    tv_h = torch.abs(x[:,:,1:,:] - x[:,:,:-1,:]).sum()
-    tv_w = torch.abs(x[:,:,:,1:] - x[:,:,:,:-1]).sum()
-    return weight * (tv_h + tv_w) / (batch_size * c * h * w)
-
 
 class Unet(nn.Module):
     """
@@ -111,78 +11,58 @@ class Unet(nn.Module):
     padidng: Boolean, if true we pad the images with 1 so that we keep the same dimensions
     """
 
-    def __init__(self,):
+    def __init__(self, input_channels, num_classes, num_filters, initializers, apply_last_layer=True, padding=True):
         super(Unet, self).__init__()
-        
-        #The first path
-        self.height1=122
-        self.width1=122
-        self.height_pad1 = find_min_power(self.height1)  
-        self.width_pad1 = find_min_power(self.width1)
-        self.v1 = torch.nn.Parameter(torch.rand((self.height_pad1, self.width_pad1)))
-        self.ST1 = Thresholding((self.height_pad1, self.width_pad1)) 
-        
-        self.height2=122
-        self.width2=122
-        self.height_pad2 = find_min_power(self.height2)  
-        self.width_pad2 = find_min_power(self.width2)
-        self.v2 = torch.nn.Parameter(torch.rand((self.height_pad2, self.width_pad2)))
-        self.ST2 = Thresholding((self.height_pad2, self.width_pad2)) 
-        
-        self.height3=122
-        self.width3=122
-        self.height_pad3 = find_min_power(self.height3)  
-        self.width_pad3 = find_min_power(self.width3)
-        self.v3 = torch.nn.Parameter(torch.rand((self.height_pad3, self.width_pad3)))
-        self.ST3 = Thresholding((self.height_pad3, self.width_pad3))
+        self.input_channels = input_channels
+        self.num_classes = num_classes
+        self.num_filters = num_filters
+        self.padding = padding
+        self.activation_maps = []
+        self.apply_last_layer = apply_last_layer
+        self.contracting_path = nn.ModuleList()
 
-        self.conv1 = nn.Conv2d(1,4,16,2,padding=1)
-        self.conv2 = nn.Conv2d(4,4,7, 1, padding=3)
-        self.conv3 = nn.ConvTranspose2d(4,4,7, 1, padding=3)
-        self.conv4 = nn.ConvTranspose2d(4,1,16, 2, padding=1)
+        for i in range(len(self.num_filters)):
+            input = self.input_channels if i == 0 else output
+            output = self.num_filters[i]
+
+            if i == 0:
+                pool = False
+            else:
+                pool = True
+
+            self.contracting_path.append(DownConvBlock(input, output, initializers, padding, pool=pool))
+
+        self.upsampling_path = nn.ModuleList()
+
+        n = len(self.num_filters) - 2
+        for i in range(n, -1, -1):
+            input = output + self.num_filters[i]
+            output = self.num_filters[i]
+            self.upsampling_path.append(UpConvBlock(input, output, initializers, padding))
+
+        if self.apply_last_layer:
+            self.last_layer = nn.Conv2d(output, num_classes, kernel_size=1)
+            #nn.init.kaiming_normal_(self.last_layer.weight, mode='fan_in',nonlinearity='relu')
+            #nn.init.normal_(self.last_layer.bias)
+
 
     def forward(self, x, val):
-        
-        x1=self.conv1(x)
-        if self.width_pad1>=self.width1 or self.height_pad1>=self.height1:
-            x2 = torch.nn.functional.pad(x1, (0, self.width_pad1-self.width1, 0, self.height_pad1-self.height1))
-        x3 = fwht(x2, axis=-1)
-        x4 = fwht(x3, axis=-2)
-        x5 = self.v1*x4
-        x6 = self.ST1(x5)
-        x7 = ifwht(x6, axis=-1)
-        x8 = ifwht(x7, axis=-2)
-        x9 = x8[..., :self.height1, :self.width1]
-        
-        x10=self.conv2(x9)
-        if self.width_pad2>=self.width2 or self.height_pad2>=self.height2:
-            x11 = torch.nn.functional.pad(x10, (0, self.width_pad2-self.width2, 0, self.height_pad2-self.height2))
-        x12 = fwht(x11, axis=-1)
-        x13 = fwht(x12, axis=-2)
-        x14 = self.v2*x13
-        x15 = self.ST2(x14)
-        x16 = ifwht(x15, axis=-1)
-        x17 = ifwht(x16, axis=-2)
-        x18 = x17[..., :self.height2, :self.width2]
-        
-        x19=self.conv3(x18)
-        x19=x19+x10
-        if self.width_pad3>=self.width3 or self.height_pad3>=self.height3:
-            x20 = torch.nn.functional.pad(x19, (0, self.width_pad3-self.width3, 0, self.height_pad3-self.height3))
-        x21 = fwht(x20, axis=-1)
-        x22 = fwht(x21, axis=-2)
-        x23 = self.v3*x22
-        x24 = self.ST3(x23)
-        x224 = x24+x6
-        x25 = ifwht(x224, axis=-1)
-        x26 = ifwht(x25, axis=-2)
-        x27 = x26[..., :self.height3, :self.width3]        
- 
-        x28=self.conv4(x27)
+        blocks = []
+        for i, down in enumerate(self.contracting_path):
+            x = down(x)
+            if i != len(self.contracting_path)-1:
+                blocks.append(x)
 
-        x=x28*x
-    
-        loss=TVLoss(x28,np.random.uniform(0,0.1))
-        
-        return x,loss
+        for i, up in enumerate(self.upsampling_path):
+            x = up(x, blocks[-i-1])
 
+        del blocks
+
+        #Used for saving the activations and plotting
+        if val:
+            self.activation_maps.append(x)
+        
+        if self.apply_last_layer:
+            x =  self.last_layer(x)
+
+        return x
