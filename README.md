@@ -18,19 +18,11 @@ Methods: The encoder comprises multiple convolutional Hadamard transform blocks 
 
 Results: Comprehensive experiments on body MRI datasets demonstrate the superiority of VHU-Net over existing state-of-the-art methods in terms of intensity uniformity, signal fidelity, and tissue contrast. Moreover, the corrected images yield substantial downstream improvements in segmentation accuracy. Our framework offers computational efficiency, interpretability, and robust performance across multi-center datasets, making it suitable for clinical deployment.
 
-# Usage
-
-python train_model.py
-
-python test.py
-
-Run the train_model.py to train the model and test.py to test the model.
 
 # Dataset
 
 We use 4 T2-weighted prostate MRI datasets in the experiment: 
 
 HK dataset, UCL dataset, HCRUDB dataset  https://liuquande.github.io/SAML/
-
 
 AWS dataset  http://medicaldecathlon.com/ .
