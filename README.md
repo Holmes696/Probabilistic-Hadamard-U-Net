@@ -20,9 +20,9 @@ Results: Comprehensive experiments on body MRI datasets demonstrate the superior
 
 # Usage
 
-Our approach integrates a Hadamard transform layer into the U-Net architecture to enhance bias field correction performance. 
+Our approach integrates Hadamard transform layers into the U-Net architecture to enhance bias field correction performance. 
 
-The folder "Hadamard_Transform_Layer_2D" contains the implementation of 2D Hadamard Transform Layer. You need to import the function "WHTConv2D":
+The folder "Hadamard_Transform_Layer_2D" contains the implementation of Hadamard transform layer. You need to import the function "WHTConv2D":
 
 ```python
 from layers.WHT import WHTConv2D
