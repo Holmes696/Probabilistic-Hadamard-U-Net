@@ -25,7 +25,7 @@ Our approach integrates Hadamard transform layers into the U-Net architecture to
 The folder "Hadamard_Transform_Layer_2D" contains the implementation of Hadamard transform layer. You need to import the function "WHTConv2D":
 
 ```python
-from layers.WHT import WHTConv2D
+from Hadamard_Transform_Layer_2D.WHT import WHTConv2D
 ```
 
 For example, if the input tensor is 3x16x32x32 and the output is 3x16x32x32, single-path HT layer:
