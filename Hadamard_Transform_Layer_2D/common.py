@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 14 12:13:40 2022
 
-@author: Zephyr
-"""
 import torch
 
 def find_min_power(x, p=2):
